@@ -1,0 +1,3 @@
+package: github.com/wupeaking/redgo
+import:
+- package: github.com/spaolacci/murmur3

@@ -1,0 +1,12 @@
+hash: 88c43063eb911eb225a8b6744ef72fdcae80eb22ba81d3868c72ef9d76485809
+updated: 2017-05-16T15:44:40.21104847+08:00
+imports:
+- name: github.com/spaolacci/murmur3
+  version: 0d12bf811670bf6a1a63828dfbd003eded177fce
+- name: github.com/wupeaking/logrus
+  version: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
+- name: golang.org/x/sys
+  version: 1e99a4f9d247b28c670884b9a8d6801f39a47b77
+  subpackages:
+  - unix
+testImports: []
