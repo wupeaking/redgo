@@ -1,5 +1,7 @@
 package datastruct
 
+// 注意这不是一个并发安全的结构
+
 import (
 	"fmt"
 
