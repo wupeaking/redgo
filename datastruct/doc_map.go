@@ -1,13 +1,5 @@
 package datastruct
 
-import (
-	"fmt"
-	"math"
-	"runtime/debug"
-	"strconv"
-	"unsafe"
-)
-
 /*
 * 当前文档 是用于示例如何实现获取一个golang原生的map的容量
 * 在golang的map设计中，当负载因子达到6.25时会进行再次的扩容
@@ -16,6 +8,7 @@ import (
  */
 // 下面是一个示例 验证在不停gc的过程中map是不会释放删除的键值的内存，同时展示如何获取map的容量
 
+/*
 type hmap struct {
 	count int // # live cells == size of map.  Must be first (used by len() builtin)
 	flags uint8
@@ -60,3 +53,4 @@ func getInfo(m map[string]string) (int, int) {
 	value := *point
 	return value.count, int(value.B)
 }
+*/
