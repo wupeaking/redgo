@@ -1,10 +1,9 @@
 package main
 
 import (
-	"runtime/debug"
 	"strconv"
 
-	"time"
+	"unsafe"
 
 	"github.com/wupeaking/redgo/datastruct"
 )
@@ -14,11 +13,24 @@ func main() {
 	mapdebug()
 
 	// 查看gc状态
-	for {
-		debug.FreeOSMemory()
-		time.Sleep(1 * time.Second)
-	}
+	// for {
+	// 	debug.FreeOSMemory()
+	// 	time.Sleep(1 * time.Second)
+	// }
 
+	d := &demo{c: "hello world hehahhhhhhhhhhhhhhhhh", d: []string{"a", "dadada", "adhiwhihdiwh"}}
+	ptr := unsafe.Pointer(d)
+	println(*(*string)(unsafe.Pointer(uintptr(ptr) + unsafe.Offsetof(d.c))))
+	println(unsafe.Sizeof(d.d))
+
+}
+
+type demo struct {
+	a int
+	b int64
+	c string
+	d []string
+	e map[string]string
 }
 
 func mapdebug() {
@@ -32,6 +44,7 @@ func mapdebug() {
 		//time.Sleep(50 * time.Millisecond)
 		d.Delete(strconv.Itoa(i))
 	}
+
 }
 
 func mapdebug1() {
