@@ -300,3 +300,29 @@ func (l *List) ListFree() {
 	l.tail = nil
 	l.len = 0
 }
+
+// StrListNode 字符串类型的函数簇
+type StrListNode struct{}
+
+// ListDup 拷贝
+func (*StrListNode) ListDup(node *ListNode) (*ListNode, error) {
+	value := node.Value.(string)
+	result := new(ListNode)
+	result.Value = value
+	return result, nil
+}
+
+// ListFree 释放
+func (*StrListNode) ListFree(node *ListNode) error {
+	// prev := node.Prev
+	// next := node.Next
+	// prev.Next = next
+	// next.Prev = prev
+	node.Value = nil
+	return nil
+}
+
+// ListMatch 比较
+func (*StrListNode) ListMatch(n1, n2 *ListNode) bool {
+	return n1.Value.(string) == n2.Value.(string)
+}
