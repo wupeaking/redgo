@@ -304,6 +304,9 @@ func (l *List) ListFree() {
 // StrListNode 字符串类型的函数簇
 type StrListNode struct{}
 
+//StrListFuncs 字符串类型的列表函数簇
+var StrListFuncs = &StrListNode{}
+
 // ListDup 拷贝
 func (*StrListNode) ListDup(node *ListNode) (*ListNode, error) {
 	value := node.Value.(string)
