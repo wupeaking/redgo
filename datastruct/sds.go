@@ -140,6 +140,11 @@ func (sds *Sds) String() string {
 	return string(sds.buf[0:sds.len])
 }
 
+// Buffer 以字节返回
+func (sds *Sds) Buffer() []byte {
+	return sds.buf[0:sds.len]
+}
+
 // SdsRange 保留指定返回的内容
 func (sds *Sds) SdsRange(left, right int) *Sds {
 	if right > sds.len {
