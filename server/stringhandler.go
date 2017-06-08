@@ -12,14 +12,14 @@ import (
 
 func (myself *SrvHandler) setValue(key string, value []byte) {
 	str := datastruct.NewSds(value)
-	v := &Value{valueType: "string", value: str}
+	v := &Value{valueType: STRING, value: str}
 	myself.db.data.Set(key, v)
 }
 
 //Set 设置一个键的值
 func (myself *SrvHandler) Set(key string, value []byte) error {
 	str := datastruct.NewSds(value)
-	v := &Value{valueType: "string", value: str}
+	v := &Value{valueType: STRING, value: str}
 	myself.db.data.Set(key, v)
 	return nil
 }
@@ -32,7 +32,7 @@ func (myself *SrvHandler) SetNx(key string, value []byte) (int, error) {
 		return 0, nil
 	}
 	str := datastruct.NewSds(value)
-	myself.db.data.Set(key, &Value{valueType: "string", value: str})
+	myself.db.data.Set(key, &Value{valueType: STRING, value: str})
 	return 1, nil
 }
 
@@ -42,7 +42,7 @@ func (myself *SrvHandler) SetRange(key string, index int, value []byte) (int, er
 	// 如果不存在键 则不需要设置
 	if !ok {
 		str := datastruct.NewSds(value)
-		myself.db.data.Set(key, &Value{valueType: "string", value: str})
+		myself.db.data.Set(key, &Value{valueType: STRING, value: str})
 		return str.SdsLen(), nil
 	}
 	// 如果存在 则更改
@@ -99,7 +99,7 @@ func (myself *SrvHandler) Get(key string) ([]byte, error) {
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "string" {
+	if comValue.valueType != STRING {
 		return nil, errors.New("当前key不是string类型")
 	}
 	sdsValue := comValue.value.(*datastruct.Sds)
@@ -141,7 +141,7 @@ func (myself *SrvHandler) GetRange(key string, left int, right int) ([]byte, err
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "string" {
+	if comValue.valueType != STRING {
 		return nil, errors.New("当前key不是string类型")
 	}
 	sdsValue := comValue.value.(*datastruct.Sds)
@@ -201,7 +201,7 @@ func (myself *SrvHandler) Append(key string, value []byte) (int, error) {
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "string" {
+	if comValue.valueType != STRING {
 		return 0, errors.New("当前key不是string类型")
 	}
 	sdsValue := comValue.value.(*datastruct.Sds)
@@ -218,7 +218,7 @@ func (myself *SrvHandler) StrLen(key string) (int, error) {
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "string" {
+	if comValue.valueType != STRING {
 		return 0, errors.New("当前key不是string类型")
 	}
 	sdsValue := comValue.value.(*datastruct.Sds)

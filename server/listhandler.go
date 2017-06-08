@@ -23,13 +23,13 @@ func (myself *SrvHandler) LPush(key string, values [][]byte) (int, error) {
 			list.ListAddNodeHead(listNode)
 		}
 
-		v := &Value{value: list, valueType: "list"}
+		v := &Value{value: list, valueType: LIST}
 		myself.db.data.Set(key, v)
 		return int(list.ListLengeth()), nil
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "list" {
+	if comValue.valueType != LIST {
 		return 0, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	listValue := comValue.value.(*datastruct.List)
@@ -56,13 +56,13 @@ func (myself *SrvHandler) RPush(key string, values [][]byte) (int, error) {
 			list.ListAddNodeTail(listNode)
 		}
 
-		v := &Value{value: list, valueType: "list"}
+		v := &Value{value: list, valueType: LIST}
 		myself.db.data.Set(key, v)
 		return int(list.ListLengeth()), nil
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "list" {
+	if comValue.valueType != LIST {
 		return 0, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	listValue := comValue.value.(*datastruct.List)
@@ -89,7 +89,7 @@ func (myself *SrvHandler) LSet(key string, index int, value []byte) error {
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "list" {
+	if comValue.valueType != LIST {
 		return errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	listValue := comValue.value.(*datastruct.List)
@@ -123,7 +123,7 @@ func (myself *SrvHandler) LRange(key string, left int, right int) ([][]byte, err
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "list" {
+	if comValue.valueType != LIST {
 		return nil, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	listValue := comValue.value.(*datastruct.List)
@@ -157,7 +157,7 @@ func (myself *SrvHandler) LLen(key string) (int, error) {
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "list" {
+	if comValue.valueType != LIST {
 		return 0, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	listValue := comValue.value.(*datastruct.List)
@@ -174,7 +174,7 @@ func (myself *SrvHandler) LIndex(key string, index int) ([]byte, error) {
 	}
 	// 如果存在 判定值类型
 	comValue := v.(*Value)
-	if comValue.valueType != "list" {
+	if comValue.valueType != LIST {
 		return nil, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	listValue := comValue.value.(*datastruct.List)
@@ -189,6 +189,43 @@ func (myself *SrvHandler) LIndex(key string, index int) ([]byte, error) {
 
 // LPop 从左边删除一个元素
 func (myself *SrvHandler) LPop(key string) ([]byte, error) {
-	// todo:: 待实现
-	return nil, nil
+	v, ok := myself.db.data.Get(key)
+	// 如果存在键 则不需要设置
+	if !ok {
+		return nil, nil
+	}
+	// 如果存在 判定值类型
+	comValue := v.(*Value)
+	if comValue.valueType != LIST {
+		return nil, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	listValue := comValue.value.(*datastruct.List)
+	node := listValue.ListFirst()
+	if node == nil {
+		return nil, nil
+	}
+	listValue.ListDelNodeByIndex(int64(0))
+	return []byte(node.Value.(string)), nil
+}
+
+// RPop 从尾部删除一个元素
+func (myself *SrvHandler) RPop(key string) ([]byte, error) {
+	v, ok := myself.db.data.Get(key)
+	// 如果存在键 则不需要设置
+	if !ok {
+		return nil, nil
+	}
+	// 如果存在 判定值类型
+	comValue := v.(*Value)
+	if comValue.valueType != LIST {
+		return nil, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	listValue := comValue.value.(*datastruct.List)
+	node := listValue.ListLast()
+	if node == nil {
+		return nil, nil
+	}
+	size := listValue.ListLengeth()
+	listValue.ListDelNodeByIndex(int64(size - 1))
+	return []byte(node.Value.(string)), nil
 }

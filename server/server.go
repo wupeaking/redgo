@@ -76,6 +76,15 @@ type Value struct {
 	valueType string
 }
 
+// 定义数据类型
+const (
+	STRING = "string"
+	LIST   = "list"
+	HASH   = "hash"
+	SET    = "set"
+	ZSET   = "zset"
+)
+
 // CreateDataBase 创建一个数据库
 func CreateDataBase() *DataBase {
 	db := new(DataBase)
