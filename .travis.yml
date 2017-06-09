@@ -3,8 +3,8 @@ language: go
 go:
   - 1.7
 
-# before_install:
-#  - go get -t -v ./...
+before_install:
+  - go env
 
 script:
   - go test -race -coverprofile=coverage.txt -covermode=atomic datastruct/*
