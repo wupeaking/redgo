@@ -4,12 +4,27 @@ go:
   - 1.7
 
 before_install:
-  - go env
+  - echo "start before install no need di nothing"
 install:
-  - echo "nothing"
+  - echo "start install no need go get"
+
+before_script:
+  - echo "start script before..."
 
 script:
   - go test -race -coverprofile=coverage.txt -covermode=atomic datastruct/*
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t 1477125f-36b1-4df5-b6b0-f5267ff3f2d8
+
+before_deploy:
+  - echo "befor deploy..."
+
+deploy:
+  - echo "deploy..."
+
+after_deploy:
+  - echo "after_deploy..."
+
+after_script:
+  - echo "after script..."
