@@ -1,12 +1,38 @@
-## 一个golang版本的redis的实现
+## 一个golang版本的redis的单机数据库实现 (仅仅为了学习)
 
-### 2017年05月20日22:18:42
-* sds字符串和相关操作API已经实现
-* 双向链表结构和相关操作API已经实现
-* 正在实现dict,相关操作已经实现，还需要实现动态扩容和缩容策略
+[![Travis](https://travis-ci.org/wupeaking/redgo.svg?branch=master)](https://travis-ci.org/wupeaking/redgo)
+[![GoDoc](https://godoc.org/github.com/wupeaking/kafkainfo?status.svg)](https://godoc.org/github.com/wupeaking/redgo)
+[![codecov.io](https://codecov.io/gh/wupeaking/redgo/coverage.svg?branch=master)](https://codecov.io/gh/wupeaking/redgo?branch=master)
 
-### 2017-06-07 11:52:59
-* 完成所有数据结构相关的编写
-* 已经实现redis的服务端协议
-* 完成了字符串类型的所有操作命令
-* 下一步需要实现列表的所有命令
+## 安装
+> 源码build
+
+```shell
+
+# clone
+export GOPATH=`pwd`
+mkdir -p  $GOPATH/src/github.com/wupeaking && cd $GOPATH/src/github.com/wupeaking
+git clone git@github.com:wupeaking/redgo.git && cd redgo
+
+# build
+go build -o redgo main.go
+
+```
+
+# 使用 
+
+* 增加一个配置文件 config.yaml
+```shell
+host: 0.0.0.0
+port: 6379
+```
+* 启动服务
+```shell
+# ./redgo
+```
+
+* 使用redis客户端连接 
+> redis-cli
+> set demo helloworld
+> get demo
+> helloworld

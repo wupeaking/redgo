@@ -75,9 +75,33 @@ func (myself *SrvHandler) RPush(key string, values [][]byte) (int, error) {
 }
 
 // LInsert 在某个值的前后插入新值
-func (myself *SrvHandler) LInsert(key string, dir string, pivot string, value []byte) (int, error) {
-	//todo :: 需要实现
-	return 0, nil
+func (myself *SrvHandler) LInsert(key string, dir []byte, pivot []byte, value []byte) (int, error) {
+	var direction int
+	if string(dir) == "BEFORE" || string(dir) == "before" {
+		direction = -1
+	} else if string(dir) == "AFTER" || string(dir) == "after" {
+		direction = 1
+	}
+
+	if direction == 0 {
+		return 0, errors.New("ERR syntax error")
+	}
+
+	v, ok := myself.db.data.Get(key)
+	// 如果存在键 则不需要设置
+	if !ok {
+		return 0, nil
+	}
+	// 如果存在 判定值类型
+	comValue := v.(*Value)
+	if comValue.valueType != LIST {
+		return 0, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	listValue := comValue.value.(*datastruct.List)
+	node := &datastruct.ListNode{Value: string(value)}
+	targetNode := &datastruct.ListNode{Value: string(pivot)}
+
+	return listValue.ListInsertNodeByValue(node, targetNode, direction)
 }
 
 // LSet 修改指定下标的值
@@ -228,4 +252,76 @@ func (myself *SrvHandler) RPop(key string) ([]byte, error) {
 	size := listValue.ListLengeth()
 	listValue.ListDelNodeByIndex(int64(size - 1))
 	return []byte(node.Value.(string)), nil
+}
+
+// LRem 删除列表的count个元素
+func (myself *SrvHandler) LRem(key string, count int, value []byte) (int, error) {
+	v, ok := myself.db.data.Get(key)
+	// 如果存在键 则不需要设置
+	if !ok {
+		return 0, nil
+	}
+
+	// 如果存在 判定值类型
+	comValue := v.(*Value)
+	if comValue.valueType != LIST {
+		return 0, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	listValue := comValue.value.(*datastruct.List)
+
+	// 构建一个节点值
+	nodeValue := &datastruct.ListNode{Value: string(value)}
+	c := 0
+	for c < count {
+		result := listValue.ListDelNodeByValue(nodeValue, count)
+		if !result {
+			return c, nil
+		}
+		c++
+	}
+	return c, nil
+}
+
+// LTrim 保留指定范围的元素
+func (myself *SrvHandler) LTrim(key string, start int, end int) error {
+	if start < 0 {
+		return errors.New("start must br a positive numberand")
+	}
+	v, ok := myself.db.data.Get(key)
+	// 如果存在键 则不需要设置
+	if !ok {
+		return nil
+	}
+	// 如果存在 判定值类型
+	comValue := v.(*Value)
+	if comValue.valueType != LIST {
+		return errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	var absright int
+	listValue := comValue.value.(*datastruct.List)
+	size := int(listValue.ListLengeth())
+	// 确定右坐标
+	if end < 0 {
+		absright = size + end
+	} else {
+		absright = end
+	}
+
+	if absright < start {
+		// 说明直接是空的了
+		listValue.ListFree()
+	}
+	listValue.ListTrim(start, absright)
+	return nil
+}
+
+// RPopLPush 一个list的尾部移除一个元素并加入到另一个list的头部
+func (myself *SrvHandler) RPopLPush(key1 string, key2 string) ([]byte, error) {
+	v, e := myself.RPop(key1)
+	if e != nil || v == nil {
+		return v, e
+	}
+
+	_, e = myself.LPush(key2, [][]byte{v})
+	return v, e
 }

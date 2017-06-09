@@ -168,7 +168,58 @@ func (l *List) ListInsertNode(newNode *ListNode, target *ListNode, dir int) (boo
 		l.len++
 		return true, nil
 	}
-	return false, errors.New("为找到定位节点")
+	return false, errors.New("未找到定位节点")
+}
+
+// ListInsertNodeByValue 将一个新节点插入指定节点的前或者尾 (比较节点的值是否相等 而不是地址) dir: 负数或0表示向前插入 正数表示向后插入
+func (l *List) ListInsertNodeByValue(newNode *ListNode, target *ListNode, dir int) (int, error) {
+	if newNode == nil {
+		return 0, errors.New("新节点地址为空")
+	}
+	// 从头开始遍历
+	i := 0
+	ptr := l.head
+	for ptr != nil {
+		if !l.Processor.ListMatch(target, ptr) {
+			i++
+			ptr = ptr.Next
+			continue
+		}
+		i++
+		// 执行到此处说明找到了定位节点
+		if dir <= 0 {
+			// 在这个节点前方加入节点 需要判断这个节点是不是首节点
+			prev := ptr.Prev
+			if prev == nil {
+				// 说明此节点是一个首节点
+				ptr.Prev = newNode
+				newNode.Next = ptr
+				newNode.Prev = nil
+				l.head = newNode
+			} else {
+				prev.Next = newNode
+				newNode.Prev = prev
+				newNode.Next = ptr
+				ptr.Prev = newNode
+			}
+		} else {
+			next := ptr.Next
+			if next == nil {
+				ptr.Next = newNode
+				newNode.Prev = ptr
+				newNode.Next = nil
+				l.tail = newNode
+			} else {
+				ptr.Next = newNode
+				newNode.Prev = ptr
+				newNode.Next = next
+				next.Prev = newNode
+			}
+		}
+		l.len++
+		return i, nil
+	}
+	return i, errors.New("为找到定位节点")
 }
 
 // ListInsterNodeByIndex 通过索引插入一个节点
@@ -264,6 +315,77 @@ func (l *List) ListDelNodeByIndex(index int64) {
 		next.Prev = prev
 	}
 	l.len--
+}
+
+// ListDelNodeByValue 根据值相等来删除指定节点
+func (l *List) ListDelNodeByValue(valueNode *ListNode, dir int) bool {
+	// 从头开始遍历
+	var ptr *ListNode
+	if dir > 0 {
+		ptr = l.head
+	} else {
+		ptr = l.tail
+	}
+
+	for ptr != nil {
+		if !l.Processor.ListMatch(valueNode, ptr) {
+			if dir > 0 {
+				ptr = ptr.Next
+			} else {
+				ptr = ptr.Prev
+			}
+			continue
+		}
+		// 执行到此处说明找到了定位节点
+		// 判断是否是首节点
+		prev := ptr.Prev
+		next := ptr.Next
+		if prev == nil && next != nil {
+			// 只是首节点
+			l.head = next
+			next.Prev = nil
+		} else if prev != nil && next == nil {
+			// 只是未节点
+			prev.Next = nil
+			l.tail = prev
+		} else if prev == nil && next == nil {
+			// 既是首节点又是尾节点
+			l.head = nil
+			l.tail = nil
+		} else {
+			// 既不是首节点也不是未节点
+			prev.Next = next
+			next.Prev = prev
+		}
+		l.len--
+		return true
+	}
+	return false
+}
+
+// ListTrim 剔除范围外的列表
+func (l *List) ListTrim(left int, right int) {
+	ptr := l.head
+	cur := 0
+	isStart := false
+	isEnd := false
+	for ptr != nil {
+		tmp := ptr.Next
+		if cur == left && isStart != true {
+			l.head = ptr
+			ptr.Prev = nil
+		}
+		if cur == right && isEnd != true {
+			l.tail = ptr
+			ptr.Next = nil
+		}
+		cur++
+		if isStart && isEnd {
+			break
+		}
+		ptr = tmp
+	}
+	l.len = int64(right - left + 1)
 }
 
 // ListCopy 返回一个链表额副本
