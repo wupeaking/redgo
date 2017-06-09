@@ -32,7 +32,9 @@ port: 6379
 ```
 
 * 使用redis客户端连接 
-> redis-cli
+```shell
+# redis-cli
 > set demo helloworld
 > get demo
 > helloworld
+```
