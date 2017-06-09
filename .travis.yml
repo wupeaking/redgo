@@ -5,6 +5,8 @@ go:
 
 before_install:
   - go env
+install:
+  - echo "nothing"
 
 script:
   - go test -race -coverprofile=coverage.txt -covermode=atomic datastruct/*
