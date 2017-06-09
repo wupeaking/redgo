@@ -1,7 +1,7 @@
 ## 一个golang版本的redis的单机数据库实现 (仅仅为了学习)
 
 [![Travis](https://travis-ci.org/wupeaking/redgo.svg?branch=master)](https://travis-ci.org/wupeaking/redgo)
-[![GoDoc](https://godoc.org/github.com/wupeaking/kafkainfo?status.svg)](https://godoc.org/github.com/wupeaking/redgo)
+[![GoDoc](https://godoc.org/github.com/wupeaking/redgo?status.svg)](https://godoc.org/github.com/wupeaking/redgo)
 [![codecov.io](https://codecov.io/gh/wupeaking/redgo/coverage.svg?branch=master)](https://codecov.io/gh/wupeaking/redgo?branch=master)
 
 ## 安装
