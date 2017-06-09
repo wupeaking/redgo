@@ -1,48 +1,65 @@
 package main
 
 import (
+	"flag"
+
+	"fmt"
+	"time"
+
+	"runtime"
+
+	log "github.com/wupeaking/logrus"
 	"github.com/wupeaking/redgo/server"
 )
 
-// type demo struct {
-// 	a int
-// 	B time.Time
-// }
+var (
+	version   = flag.Bool("version", false, "show version")
+	configire = flag.String("configure", "./configure.yaml", "configure file path")
+	loglevel  = flag.String("loglevel", "error", "set log level")
+)
 
-// type NewTime struct {
-// 	time.Time
-// }
-
-// func (t NewTime) String() string {
-// 	return "xxxooo"
-// }
-
-// // Jon公共方法
-// func (myself *demo) Jon() int {
-// 	return myself.a
-// }
+var (
+	// GitCommit git版本号
+	GitCommit string
+	// Branch 分支名称
+	Branch string
+)
 
 func main() {
-	// d := &demo{a: 3, B: time.Now()}
-	// fmt.Println(d.B)
-	// // // newfunc := func(in []reflect.Value) []reflect.Value {
-	// // // 	return in
-	// // // }
-	// // //fn, _ := reflect.TypeOf(d).MethodByName("Jon")
-	// // // fn := reflect.ValueOf(d.Jon).Elem()
-	// // // v := reflect.MakeFunc(reflect.TypeOf(d.Jon), newfunc)
-	// // // println(fn.CanSet())
-	// // // fn.Set(v)
-	// // // nfn := reflect.ValueOf(d).Elem()
-	// // // println(nfn.CanSet())
-	// // // nfn.Set(v)
-	// // println(d.Jon())
-	// a := NewTime{time.Now().Add(time.Hour)}
-	// ta := (*time.Time)(unsafe.Pointer(&a))
-	// v := reflect.ValueOf(*ta)
+	flag.Parse()
+	if *version {
+		println("commit: ", GitCommit, " branch: ", Branch)
+		return
+	}
+	setLogLevel()
 
-	// reflect.ValueOf(d).Elem().FieldByName("B").Set(v)
+	log.SetFormatter(&LogFormat{})
+	log.Error(*version, *configire, *loglevel)
+	server.StartServer(*configire)
+}
 
-	// fmt.Println(d.B.String())
-	server.StartServer("./config.yaml")
+// LogFormat 自定义日志格式
+type LogFormat struct {
+}
+
+// Format 实现Formatter接口
+func (format *LogFormat) Format(entry *log.Entry) ([]byte, error) {
+	_, file, line, _ := runtime.Caller(5)
+	info := fmt.Sprintf("[%s] (%s@%d level=%s) %s\n", time.Now().Format("2006-01-02 15:04:05"),
+		file, line, entry.Level.String(), entry.Message)
+
+	return []byte(info), nil
+}
+
+func setLogLevel() {
+	switch *loglevel {
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	}
 }
