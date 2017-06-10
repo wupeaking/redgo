@@ -21,14 +21,14 @@ var (
 var (
 	// GitCommit git版本号
 	GitCommit string
-	// Branch 分支名称
-	Branch string
+	// Version 版本
+	Version string
 )
 
 func main() {
 	flag.Parse()
 	if *version {
-		println("commit: ", GitCommit, " branch: ", Branch)
+		println("commit: ", GitCommit, " version: ", Version)
 		return
 	}
 	setLogLevel()
