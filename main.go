@@ -14,7 +14,7 @@ import (
 
 var (
 	version   = flag.Bool("version", false, "show version")
-	configire = flag.String("configure", "./configure.yaml", "configure file path")
+	configire = flag.String("configure", "./config.yaml", "configure file path")
 	loglevel  = flag.String("loglevel", "error", "set log level")
 )
 
@@ -34,8 +34,9 @@ func main() {
 	setLogLevel()
 
 	log.SetFormatter(&LogFormat{})
-	log.Error(*version, *configire, *loglevel)
-	server.StartServer(*configire)
+
+	err := server.StartServer(*configire)
+	log.Error("start server faild: ", err)
 }
 
 // LogFormat 自定义日志格式

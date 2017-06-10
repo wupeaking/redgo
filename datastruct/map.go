@@ -8,6 +8,7 @@ package datastruct
 
 import (
 	"math"
+	"regexp"
 	"sync"
 	"unsafe"
 
@@ -88,6 +89,41 @@ func (myself *Map) Delete(key string) {
 	if myself.value2 != nil {
 		delete(myself.value2, key)
 	}
+}
+
+// Keys 返回所有的key
+func (myself *Map) Keys(pattern string) ([][]byte, error) {
+	result := make([][]byte, 0, 100)
+	re, e := regexp.Compile(pattern)
+	if e != nil {
+		return nil, e
+	}
+	if myself.value1 != nil {
+		for key := range myself.value1 {
+			bytekey := []byte(key)
+			if re.Match(bytekey) {
+				result = append(result, bytekey)
+			}
+		}
+	}
+	if myself.value1 != nil {
+		for key := range myself.value2 {
+			bytekey := []byte(key)
+			if re.Match(bytekey) {
+				result = append(result, bytekey)
+			}
+		}
+	}
+	return result, nil
+}
+
+// Free 是否所有内容
+func (myself *Map) Free() {
+	myself.RLock()
+	defer myself.RUnlock()
+	myself.value1 = make(map[string]interface{})
+	myself.value2 = make(map[string]interface{})
+	myself.refrash = -1
 }
 
 // Len 获取当前键值个数
