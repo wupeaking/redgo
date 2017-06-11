@@ -117,6 +117,22 @@ func (myself *Map) Keys(pattern string) ([][]byte, error) {
 	return result, nil
 }
 
+// RandomKeys 返回一个随机键
+func (myself *Map) RandomKeys(pattern string) ([]byte, error) {
+
+	if myself.value1 != nil {
+		for key := range myself.value1 {
+			return []byte(key), nil
+		}
+	}
+	if myself.value1 != nil {
+		for key := range myself.value2 {
+			return []byte(key), nil
+		}
+	}
+	return nil, nil
+}
+
 // Free 是否所有内容
 func (myself *Map) Free() {
 	myself.RLock()

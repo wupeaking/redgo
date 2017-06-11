@@ -32,7 +32,7 @@ func main() {
 		return
 	}
 	setLogLevel()
-
+	log.Info("set log level: ", *loglevel)
 	log.SetFormatter(&LogFormat{})
 
 	err := server.StartServer(*configire)
