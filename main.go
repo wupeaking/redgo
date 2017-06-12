@@ -31,10 +31,10 @@ func main() {
 		println("commit: ", GitCommit, " version: ", Version)
 		return
 	}
-	setLogLevel()
 	log.Info("set log level: ", *loglevel)
+	setLogLevel()
 	log.SetFormatter(&LogFormat{})
-
+	log.Info("start server...")
 	err := server.StartServer(*configire)
 	log.Error("start server faild: ", err)
 }
