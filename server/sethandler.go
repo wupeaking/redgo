@@ -348,3 +348,94 @@ func (myself *SrvHandler) SUnionStore(newkey string, key []byte, keys [][]byte) 
 	myself.db.data.Set(newkey, newV)
 	return len(members), nil
 }
+
+// 删除相关操作
+
+// SRem 删除集合中的某些元素 可以一次删除多个 返回删除成功的个数 如果该集合不存在 返回0
+func (myself *SrvHandler) SRem(key string, members [][]byte) (int, error) {
+	//
+	v, ok := myself.db.data.Get(key)
+	// 判断是否存在
+	if !ok {
+		return 0, nil
+	}
+	comValue := v.(*Value)
+	if comValue.valueType != SET {
+		return 0, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+
+	hashValue := comValue.value.(*datastruct.Map)
+	count := 0
+	for _, member := range members {
+		mk := string(member)
+		_, ok := hashValue.Get(mk)
+		if ok {
+			hashValue.Delete(mk)
+			count++
+		}
+	}
+	return count, nil
+}
+
+// SPop 随机删除一个元素 并返回删除的元素 如果集合已经没有元素或者该集合不存在 返回nil
+func (myself *SrvHandler) SPop(key string) ([]byte, error) {
+	v, ok := myself.db.data.Get(key)
+	// 判断是否存在
+	if !ok {
+		return nil, nil
+	}
+	comValue := v.(*Value)
+	if comValue.valueType != SET {
+		return nil, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+
+	hashValue := comValue.value.(*datastruct.Map)
+	keyb, e := hashValue.RandomKeys(".")
+	if e != nil {
+		return nil, e
+	}
+	if keyb != nil {
+		hashValue.Delete(string(keyb))
+	}
+	return keyb, nil
+}
+
+// SMove 将第一个集合中的元素移到另一个集合中去 如果操作成功返回1 失败返回0 如果目的集合不存在则创建
+func (myself *SrvHandler) SMove(keySrc string, keyDst []byte) (int, error) {
+	v, ok := myself.db.data.Get(keySrc)
+	// 判断是否存在
+	if !ok {
+		return 0, nil
+	}
+	comValue := v.(*Value)
+	if comValue.valueType != SET {
+		return 0, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+
+	hashValue := comValue.value.(*datastruct.Map)
+	memb, e := hashValue.RandomKeys(".")
+	if e != nil {
+		return 0, e
+	}
+	if memb == nil {
+		return 0, nil
+	}
+	hashValue.Delete(string(memb))
+
+	vdst, ok := myself.db.data.Get(string(keyDst))
+	if ok {
+		comValue := vdst.(*Value)
+		if comValue.valueType != SET {
+			return 0, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+		}
+		hash := comValue.value.(*datastruct.Map)
+		hash.Set(string(memb), nil)
+		return 1, nil
+	}
+	// 需要新建set
+	newHash := datastruct.NewMap()
+	newHash.Set(string(memb), nil)
+	newV := &Value{value: newHash, valueType: SET}
+	myself.db.data.Set(string(keyDst), newV)
+	return 1, nil
+}
