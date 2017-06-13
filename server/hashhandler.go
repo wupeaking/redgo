@@ -114,7 +114,7 @@ func (myself *SrvHandler) HGet(key string, field []byte) ([]byte, error) {
 }
 
 //HMGet 获取hash多个字段的内容
-func (myself *SrvHandler) HMGet(key string, fields []byte) ([][]byte, error) {
+func (myself *SrvHandler) HMGet(key string, fields [][]byte) ([][]byte, error) {
 	result := make([][]byte, 0, 10)
 	v, ok := myself.db.data.Get(key)
 	// 判断是否存在

@@ -28,6 +28,7 @@ func TestString(t *testing.T) {
 	if e != nil {
 		t.Fatal("连接redis出错: ", e)
 	}
+	con.Do("FLUSHALL")
 
 	// set 一个值
 	_, e = con.Do("SET", "sringdemo", "helloworld")
@@ -77,7 +78,7 @@ func TestList(t *testing.T) {
 	if e != nil {
 		t.Fatal("连接redis出错: ", e)
 	}
-
+	con.Do("FLUSHALL")
 	// LPUSH
 	_, e = con.Do("LPUSH", "listdemo", "aa", "bb", "cc", "dd")
 	if e != nil {
@@ -162,6 +163,168 @@ func TestList(t *testing.T) {
 
 	if len(lists) != 2 || lists[0] != "bb" || lists[1] != "cc" || e != nil {
 		t.Fatal("lrange command err: ", e, lists)
+	}
+
+}
+
+func TestHash(t *testing.T) {
+	con, e := redis.DialTimeout("tcp", "127.0.0.1:6379", 10*time.Second, 1*time.Second, 1*time.Second)
+	if e != nil {
+		t.Fatal("连接redis出错: ", e)
+	}
+	con.Do("FLUSHALL")
+	// HSET
+	_, e = con.Do("HSET", "hsetdemo", "name", "wupeaking")
+	if e != nil {
+		t.Fatal("hset command err: ", e)
+	}
+
+	// HGET
+	getv, e := redis.String(con.Do("HGET", "hsetdemo", "name"))
+	if e != nil || getv != "wupeaking" {
+		t.Fatal("hset command err: ", e)
+	}
+
+	// HMSET
+	_, e = con.Do("HMSET", "hmsetdemo", "name", "wupeaking", "age", 27)
+	if e != nil {
+		t.Fatal("hmset command err: ", e)
+	}
+	// HMGET
+	mgetv, e := redis.Strings(con.Do("HMGET", "hmsetdemo", "name", "age"))
+	if e != nil || len(mgetv) != 2 || mgetv[0] != "wupeaking" || mgetv[1] != "27" {
+		t.Fatal("hmget command err: ", e, mgetv)
+	}
+
+	// HExists
+	is, e := redis.Int(con.Do("HEXISTS", "hmsetdemo", "name"))
+	if e != nil || is != 1 {
+		t.Fatal("HExists command err: ", e, mgetv)
+	}
+
+	// HKeys
+	keys, e := redis.Strings(con.Do("HKEYS", "hmsetdemo"))
+	if e != nil || len(keys) != 2 {
+		t.Fatal("HKeys command err: ", e, mgetv)
+	}
+
+	// HVals
+	vals, e := redis.Strings(con.Do("HVALS", "hmsetdemo"))
+	if e != nil || len(vals) != 2 {
+		t.Fatal("HKeys command err: ", e, mgetv)
+	}
+
+	// HGetAll
+	kv, e := redis.Strings(con.Do("HGETALL", "hmsetdemo"))
+	if e != nil || len(kv) != 4 {
+		t.Fatal("HGetAll command err: ", e, mgetv)
+	}
+
+	// HLen
+	length, e := redis.Int(con.Do("HLEN", "hmsetdemo"))
+	if e != nil || length != 2 {
+		t.Fatal("HLen command err: ", e, mgetv)
+	}
+
+	// HDel
+	con.Do("HDEL", "hmsetdemo", "age")
+
+	ret, e := con.Do("HGET", "hmsetdemo", "age")
+	if ret != nil {
+		t.Fatal("HDel command err: ", e, ret)
+	}
+
+}
+
+func TestSet(t *testing.T) {
+	con, e := redis.DialTimeout("tcp", "127.0.0.1:6379", 10*time.Second, 1*time.Second, 1*time.Second)
+	if e != nil {
+		t.Fatal("连接redis出错: ", e)
+	}
+	con.Do("FLUSHALL")
+
+	// SAdd
+	_, e = con.Do("SADD", "setdemo", "golang", "python", "java")
+	if e != nil {
+		t.Fatal("sadd command err: ", e)
+	}
+	// SMembers
+	members, e := redis.Strings(con.Do("SMEMBERS", "setdemo"))
+	if len(members) != 3 || e != nil {
+		t.Fatal("SMembers command err: ", e)
+	}
+	// SIsMember
+	is, e := redis.Bool(con.Do("SISMEMBER", "setdemo", "python"))
+	if !is || e != nil {
+		t.Fatal("SIsMember command err: ", e, is)
+	}
+
+	// SCard
+	length, e := redis.Int(con.Do("SCARD", "setdemo"))
+	if length != 3 || e != nil {
+		t.Fatal("SCard command err: ", e, is)
+	}
+
+	// SInter
+	con.Do("SADD", "setdemo1", "golang", "php", "ruby", "c++")
+
+	inter, e := redis.Strings(con.Do("SINTER", "setdemo", "setdemo1"))
+	if len(inter) != 1 || e != nil {
+		t.Fatal("SInter command err: ", e, inter)
+	}
+
+	// SInterStore
+	con.Do("SINTERSTORE", "setdemointer", "setdemo", "setdemo1")
+	is, e = redis.Bool(con.Do("SISMEMBER", "setdemointer", "golang"))
+	if !is || e != nil {
+		t.Fatal("SInterStore command err: ", e, is)
+	}
+
+	// SDiff
+	diff, e := redis.Strings(con.Do("SDIFF", "setdemo", "setdemo1"))
+	if len(diff) != 2 || e != nil {
+		t.Fatal("SDiff command err: ", e, diff)
+	}
+
+	//SDiffStore
+	con.Do("SDIFFSTORE", "setdemodiff", "setdemo", "setdemo1")
+	is, e = redis.Bool(con.Do("SISMEMBER", "setdemodiff", "python"))
+	if !is || e != nil {
+		t.Fatal("SDiffStore command err: ", e, is)
+	}
+
+	//SUnion
+	union, e := redis.Strings(con.Do("SUNION", "setdemo", "setdemo1"))
+	if len(union) != 6 || e != nil {
+		t.Fatal("SDiff command err: ", e, union)
+	}
+
+	// SUnionStore
+	con.Do("SUNIONSTORE", "setdemounion", "setdemo", "setdemo1")
+	is, e = redis.Bool(con.Do("SISMEMBER", "setdemounion", "php"))
+	if !is || e != nil {
+		t.Fatal("SUnionStore command err: ", e, is)
+	}
+
+	// SRem
+	con.Do("SREM", "setdemodiff", "golang")
+	is, e = redis.Bool(con.Do("SISMEMBER", "setdemodiff", "golang"))
+	if is || e != nil {
+		t.Fatal("SUnionStore command err: ", e, is)
+	}
+
+	// SPop
+	pop, e := redis.String(con.Do("SPOP", "setdemounion"))
+	if pop == "" || e != nil {
+		t.Fatal("spop  command err: ", e, pop)
+	}
+
+	// SMove
+
+	con.Do("SMOVE", "setdemo", "newsetdemo")
+	is, e = redis.Bool(con.Do("SISMEMBER", "newsetdemo", "golang"))
+	if !is || e != nil {
+		t.Fatal("SUnionStore command err: ", e, is)
 	}
 
 }
