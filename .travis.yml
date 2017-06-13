@@ -12,7 +12,9 @@ before_script:
   - echo "start script before..."
 
 script:
+  - go run main.go &
   - go test -race -coverprofile=coverage.txt -covermode=atomic datastruct/*
+  - go test -race -coverprofile=coverage.txt -covermode=atomic server/*
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t 1477125f-36b1-4df5-b6b0-f5267ff3f2d8
