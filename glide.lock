@@ -1,5 +1,5 @@
 hash: 88c43063eb911eb225a8b6744ef72fdcae80eb22ba81d3868c72ef9d76485809
-updated: 2017-06-06T13:53:12.710538935+08:00
+updated: 2017-06-12T17:21:08.527459869+08:00
 imports:
 - name: github.com/emirpasic/gods
   version: f6c17b524822278a87e3b3bd809fec33b51f5b46
@@ -15,12 +15,17 @@ imports:
   version: ec46b0116df083cba218abbf72522c6d0c065e4e
   subpackages:
   - trees/redblacktree
-- name: gopkg.in/yaml.v2
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
-testImports:
 - name: github.com/wupeaking/logrus
   version: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
 - name: golang.org/x/sys
-  version: b90f89a1e7a9c1f6b918820b3daa7f08488c8594
+  version: 0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79
   subpackages:
   - unix
+- name: gopkg.in/yaml.v2
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+testImports:
+- name: github.com/garyburd/redigo
+  version: 95d11dba2d44531bdb8022752b98912baafae03a
+  subpackages:
+  - internal
+  - redis

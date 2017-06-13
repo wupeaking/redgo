@@ -131,7 +131,7 @@ func (myself *SrvHandler) Mget(keys []string) ([][]byte, error) {
 
 // GetRange 返回指定返回的子串
 func (myself *SrvHandler) GetRange(key string, left int, right int) ([]byte, error) {
-	if left > right || left < 0 {
+	if left < 0 {
 		return nil, errors.New("start end must be a positive numberand start should Less than end")
 	}
 	v, ok := myself.db.data.Get(key)
@@ -152,7 +152,13 @@ func (myself *SrvHandler) GetRange(key string, left int, right int) ([]byte, err
 	if right > sdsValue.SdsLen() {
 		right = sdsValue.SdsLen()
 	}
-	return sdsValue.Buffer()[left:right], nil
+	if right < 0 {
+		right = sdsValue.SdsLen() + right
+	}
+	if right < 0 {
+		return []byte(""), nil
+	}
+	return sdsValue.Buffer()[left : right+1], nil
 }
 
 // Incr 自增

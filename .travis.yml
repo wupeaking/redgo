@@ -3,16 +3,21 @@ language: go
 go:
   - 1.7
 
+services:
+  - docker
+
 before_install:
   - echo "start before install no need di nothing"
 install:
-  - echo "start install no need go get"
+  - make
 
 before_script:
-  - echo "start script before..."
+  - make docker
 
 script:
+  - docker run -p 6379:6379 -d redgo:v0.0.1 
   - go test -race -coverprofile=coverage.txt -covermode=atomic datastruct/*
+  - go test -race -coverprofile=coverage.txt -covermode=atomic server/*
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t 1477125f-36b1-4df5-b6b0-f5267ff3f2d8
