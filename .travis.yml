@@ -13,6 +13,7 @@ before_script:
 
 script:
   - go run main.go &
+  - sleep 5
   - go test -race -coverprofile=coverage.txt -covermode=atomic datastruct/*
   - go test -race -coverprofile=coverage.txt -covermode=atomic server/*
 
