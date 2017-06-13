@@ -28,7 +28,6 @@ func TestString(t *testing.T) {
 	if e != nil {
 		t.Fatal("连接redis出错: ", e)
 	}
-	con.Flush()
 
 	// set 一个值
 	_, e = con.Do("SET", "sringdemo", "helloworld")
@@ -71,4 +70,98 @@ func TestString(t *testing.T) {
 	if e != nil || l != len("helloworld") {
 		t.Fatal("append command err : ", e, v)
 	}
+}
+
+func TestList(t *testing.T) {
+	con, e := redis.DialTimeout("tcp", "127.0.0.1:6379", 10*time.Second, 1*time.Second, 1*time.Second)
+	if e != nil {
+		t.Fatal("连接redis出错: ", e)
+	}
+
+	// LPUSH
+	_, e = con.Do("LPUSH", "listdemo", "aa", "bb", "cc", "dd")
+	if e != nil {
+		t.Fatal("lpush command err: ", e)
+	}
+
+	// LRANGE
+	lists, e := redis.Strings(con.Do("LRANGE", "listdemo", 0, -1))
+	if e != nil {
+		t.Fatal("lrange command err: ", e)
+	}
+	if len(lists) != 4 || lists[0] != "dd" || lists[1] != "cc" || lists[2] != "bb" || lists[3] != "aa" {
+		t.Fatal("lrange command err: ", lists)
+	}
+	con.Do("DEL", "listdemo")
+
+	// RPUSH
+	_, e = con.Do("RPUSH", "listdemo", "aa", "bb", "cc", "dd")
+	if e != nil {
+		t.Fatal("rpush command err: ", e)
+	}
+	lists, e = redis.Strings(con.Do("LRANGE", "listdemo", 0, -1))
+	if e != nil {
+		t.Fatal("lrange command err: ", e)
+	}
+	if len(lists) != 4 || lists[0] != "aa" || lists[1] != "bb" || lists[2] != "cc" || lists[3] != "dd" {
+		t.Fatal("lrange command err: ", lists)
+	}
+
+	// LSET
+	_, e = con.Do("LSET", "listdemo", 1, "xxoo")
+	if e != nil {
+		t.Fatal("rpush command err: ", e)
+	}
+	lists, e = redis.Strings(con.Do("LRANGE", "listdemo", 0, -1))
+	if e != nil {
+		t.Fatal("lrange command err: ", e)
+	}
+	if len(lists) != 4 || lists[0] != "aa" || lists[1] != "xxoo" || lists[2] != "cc" || lists[3] != "dd" {
+		t.Fatal("lrange command err: ", lists)
+	}
+
+	// LLEN
+	listlen, e := redis.Int(con.Do("LLEN", "listdemo"))
+	if e != nil {
+		t.Fatal("lrange command err: ", e)
+	}
+	if listlen != 4 {
+		t.Fatal("lrange command err: ", lists)
+	}
+
+	// LINSERT
+	_, e = con.Do("LINSERT", "listdemo", "AFTER", "aa", "aaxxoo")
+	if e != nil {
+		t.Fatal("rpush command err: ", e)
+	}
+	lists, e = redis.Strings(con.Do("LRANGE", "listdemo", 0, -1))
+	if e != nil {
+		t.Fatal("lrange command err: ", e)
+	}
+	if len(lists) != 5 || lists[1] != "aaxxoo" {
+		t.Fatal("lrange command err: ", lists)
+	}
+
+	// LPOP
+	lpop, e := redis.String(con.Do("LPOP", "listdemo"))
+	if e != nil || lpop != "aa" {
+		t.Fatal("rpush command err: ", e)
+	}
+
+	con.Do("DEL", "listdemo")
+	_, e = con.Do("RPUSH", "listdemo", "aa", "bb", "cc", "dd")
+	// RPOP
+	rpop, e := redis.String(con.Do("RPOP", "listdemo"))
+	if e != nil || rpop != "dd" {
+		t.Fatal("rpush command err: ", e)
+	}
+
+	//LREM
+	_, e = con.Do("LREM", "listdemo", 1, "aa")
+	lists, e = redis.Strings(con.Do("LRANGE", "listdemo", 0, -1))
+
+	if len(lists) != 2 || lists[0] != "bb" || lists[1] != "cc" || e != nil {
+		t.Fatal("lrange command err: ", e, lists)
+	}
+
 }

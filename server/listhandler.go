@@ -126,9 +126,9 @@ func (myself *SrvHandler) LSet(key string, index int, value []byte) error {
 	if index < 0 || index >= size {
 		return errors.New("ERR index out of range")
 	}
-	listNode := &datastruct.ListNode{Value: string(value)}
-	_, e := listValue.ListInsterNodeByIndex(listNode, int64(index), 1)
-	return e
+	node := listValue.ListIndex(int64(index))
+	node.Value = string(value)
+	return nil
 }
 
 // 读取相关----------
